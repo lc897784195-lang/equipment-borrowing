@@ -1,17 +1,40 @@
-const mongoose = require('mongoose');
+const BaseModel = require('./BaseModel');
+const { _ } = require('../config/db');
 
-const bookingSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  equipmentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Equipment', required: true },
-  date: { type: Date, required: true },
-  startTime: { type: String, required: true },
-  endTime: { type: String, required: true },
-  status: { type: String, enum: ['pending', 'approved', 'rejected', 'returned'], default: 'pending' },
-  returnImageUrl: { type: String, default: '' },
-  adminNote: { type: String, default: '' }
-}, { timestamps: true });
+class Booking extends BaseModel {
+  constructor() {
+    super('bookings');
+  }
 
-bookingSchema.index({ equipmentId: 1, date: 1 });
-bookingSchema.index({ userId: 1 });
+  async create(data) {
+    data.status = data.status || 'pending';
+    data.returnImageUrl = data.returnImageUrl || '';
+    data.adminNote = data.adminNote || '';
+    data.createdAt = new Date();
+    return super.create(data);
+  }
 
-module.exports = mongoose.model('Booking', bookingSchema);
+  async findByUser(userId) {
+    return this.find({ userId }, { orderBy: { field: 'createdAt', order: 'desc' } });
+  }
+
+  async findByEquipmentAndDate(equipmentId, date) {
+    return this.find({
+      equipmentId,
+      date,
+      status: _.in(['pending', 'approved'])
+    });
+  }
+
+  async findConflicting(equipmentId, date, startTime, endTime) {
+    return this.findOne({
+      equipmentId,
+      date,
+      status: _.in(['pending', 'approved']),
+      startTime: _.lt(endTime),
+      endTime: _.gt(startTime)
+    });
+  }
+}
+
+module.exports = new Booking();

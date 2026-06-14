@@ -8,17 +8,32 @@ const router = express.Router();
 
 router.get('/stats', adminAuth, async (req, res) => {
   try {
-    const totalEquipment = await Equipment.countDocuments();
-    const availableEquipment = await Equipment.countDocuments({ status: 'available' });
-    const pendingBookings = await Booking.countDocuments({ status: 'pending' });
-    const activeBookings = await Booking.countDocuments({ status: 'approved' });
-    const totalUsers = await User.countDocuments({ role: 'user' });
-    const recentBookings = await Booking.find()
-      .populate('userId', 'name')
-      .populate('equipmentId', 'name')
-      .sort({ createdAt: -1 })
-      .limit(5);
-    res.json({ totalEquipment, availableEquipment, pendingBookings, activeBookings, totalUsers, recentBookings });
+    const totalEquipment = await Equipment.count();
+    const availableEquipment = await Equipment.count({ status: 'available' });
+    const pendingBookings = await Booking.count({ status: 'pending' });
+    const activeBookings = await Booking.count({ status: 'approved' });
+    const totalUsers = await User.count({ role: 'user' });
+
+    const recentBookings = await Booking.find({}, { orderBy: { field: 'createdAt', order: 'desc' }, limit: 5 });
+
+    const populatedBookings = await Promise.all(recentBookings.map(async (booking) => {
+      const user = await User.findById(booking.userId);
+      const equipment = await Equipment.findById(booking.equipmentId);
+      return {
+        ...booking,
+        userId: user ? { _id: user._id, name: user.name } : null,
+        equipmentId: equipment ? { _id: equipment._id, name: equipment.name } : null
+      };
+    }));
+
+    res.json({
+      totalEquipment,
+      availableEquipment,
+      pendingBookings,
+      activeBookings,
+      totalUsers,
+      recentBookings: populatedBookings
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -26,14 +41,29 @@ router.get('/stats', adminAuth, async (req, res) => {
 
 router.get('/my-stats', auth, async (req, res) => {
   try {
-    const myBookings = await Booking.countDocuments({ userId: req.user._id });
-    const myPendingBookings = await Booking.countDocuments({ userId: req.user._id, status: 'pending' });
-    const myActiveBookings = await Booking.countDocuments({ userId: req.user._id, status: 'approved' });
-    const recentBookings = await Booking.find({ userId: req.user._id })
-      .populate('equipmentId', 'name model')
-      .sort({ createdAt: -1 })
-      .limit(5);
-    res.json({ myBookings, myPendingBookings, myActiveBookings, recentBookings });
+    const myBookings = await Booking.count({ userId: req.user._id });
+    const myPendingBookings = await Booking.count({ userId: req.user._id, status: 'pending' });
+    const myActiveBookings = await Booking.count({ userId: req.user._id, status: 'approved' });
+
+    const recentBookings = await Booking.find(
+      { userId: req.user._id },
+      { orderBy: { field: 'createdAt', order: 'desc' }, limit: 5 }
+    );
+
+    const populatedBookings = await Promise.all(recentBookings.map(async (booking) => {
+      const equipment = await Equipment.findById(booking.equipmentId);
+      return {
+        ...booking,
+        equipmentId: equipment ? { _id: equipment._id, name: equipment.name, model: equipment.model } : null
+      };
+    }));
+
+    res.json({
+      myBookings,
+      myPendingBookings,
+      myActiveBookings,
+      recentBookings: populatedBookings
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

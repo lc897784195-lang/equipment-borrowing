@@ -1,13 +1,12 @@
-const mongoose = require('mongoose');
+const cloudbase = require('@cloudbase/node-sdk');
 
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
-    process.exit(1);
-  }
-};
+const app = cloudbase.init({
+  env: process.env.TCB_ENV || 'your-env-id',
+  secretId: process.env.TCB_SECRET_ID,
+  secretKey: process.env.TCB_SECRET_KEY,
+});
 
-module.exports = connectDB;
+const db = app.database();
+const _ = db.command;
+
+module.exports = { db, _ };
