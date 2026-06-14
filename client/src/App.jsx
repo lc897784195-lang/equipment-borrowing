@@ -6,6 +6,9 @@ import Register from './pages/Register';
 import EquipmentList from './pages/EquipmentList';
 import EquipmentBooking from './pages/EquipmentBooking';
 import MyBookings from './pages/MyBookings';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import EquipmentManagement from './pages/admin/EquipmentManagement';
+import BookingManagement from './pages/admin/BookingManagement';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -64,7 +67,23 @@ function App() {
             path="/admin"
             element={
               <AdminRoute>
-                <div>Admin Dashboard - Coming Soon</div>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/equipment"
+            element={
+              <AdminRoute>
+                <EquipmentManagement />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/bookings"
+            element={
+              <AdminRoute>
+                <BookingManagement />
               </AdminRoute>
             }
           />
