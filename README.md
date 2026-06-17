@@ -120,12 +120,6 @@ npx tcb app deploy --framework vite -e 你的环境ID --install-command "npm ins
 
 部署成功后会显示访问地址。
 
-### 第11步：设置管理员
-
-注册第一个账号后，需要手动设置为管理员：
-
-在 CloudBase 控制台 → 数据库 → `users` 集合，找到你的用户记录，将 `role` 字段改为 `admin`。
-
 ## 本地开发
 
 ```bash
