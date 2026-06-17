@@ -13,11 +13,11 @@ app.use(cors({
 }));
 app.use(express.json());
 
-app.get('/api', (req, res) => res.send('Equipment Borrowing API'));
+app.get('/', (req, res) => res.send('Equipment Borrowing API'));
 
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/equipment', require('./routes/equipment'));
-app.use('/api/bookings', require('./routes/bookings'));
-app.use('/api/dashboard', require('./routes/dashboard'));
+app.use('/auth', require('./routes/auth'));
+app.use('/equipment', require('./routes/equipment'));
+app.use('/bookings', require('./routes/bookings'));
+app.use('/dashboard', require('./routes/dashboard'));
 
 module.exports = app;
