@@ -7,14 +7,14 @@ const router = express.Router();
 
 router.post('/register', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, role } = req.body;
 
     const existingUsername = await User.findByUsername(username);
     if (existingUsername) {
       return res.status(400).json({ error: '用户名已存在' });
     }
 
-    const user = await User.create({ username, password, name: username });
+    const user = await User.create({ username, password, name: username, role: role || 'user' });
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({
