@@ -119,7 +119,7 @@ router.put('/:id/approve', adminAuth, async (req, res) => {
 
     const updated = await Booking.updateById(req.params.id, {
       status: 'approved',
-      adminNote: req.body.note || ''
+      adminNote: req.body?.note || ''
     });
 
     res.json(updated);
@@ -140,7 +140,7 @@ router.put('/:id/reject', adminAuth, async (req, res) => {
 
     const updated = await Booking.updateById(req.params.id, {
       status: 'rejected',
-      adminNote: req.body.note || ''
+      adminNote: req.body?.note || ''
     });
 
     res.json(updated);
