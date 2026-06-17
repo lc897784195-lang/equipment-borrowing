@@ -6,19 +6,12 @@ const MyBookings = () => {
   const [loading, setLoading] = useState(true);
   useEffect(() => { api.get('/bookings').then(res => setBookings(res.data)).finally(() => setLoading(false)); }, []);
   const handleReturn = async (bookingId) => {
-    const input = document.createElement('input');
-    input.type = 'file'; input.accept = 'image/*';
-    input.onchange = async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const formData = new FormData(); formData.append('image', file);
-      try {
-        await api.put(`/bookings/${bookingId}/return`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-        api.get('/bookings').then(res => setBookings(res.data));
-        alert('归还成功');
-      } catch (error) { alert(error.response?.data?.error || '归还失败'); }
-    };
-    input.click();
+    if (!window.confirm('确认归还此设备？')) return;
+    try {
+      await api.put(`/bookings/${bookingId}/return`, {});
+      api.get('/bookings').then(res => setBookings(res.data));
+      alert('归还成功');
+    } catch (error) { alert(error.response?.data?.error || '归还失败'); }
   };
   if (loading) return <div>加载中...</div>;
   return (
@@ -31,13 +24,12 @@ const MyBookings = () => {
               <div>
                 <h3 className="font-semibold">{booking.equipmentId?.name}</h3>
                 <p className="text-gray-600">{booking.equipmentId?.model}</p>
-                <p className="text-sm text-gray-500">{new Date(booking.date).toLocaleDateString()} {booking.startTime} - {booking.endTime}</p>
+                <p className="text-sm text-gray-500">{booking.date} {booking.startTime} - {booking.endTime}</p>
               </div>
               <BookingStatusBadge status={booking.status} />
             </div>
             {booking.adminNote && <p className="text-sm text-gray-500 mt-2">管理员备注：{booking.adminNote}</p>}
             {booking.status === 'approved' && <button onClick={() => handleReturn(booking._id)} className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">归还设备</button>}
-            {booking.returnImageUrl && <div className="mt-2"><p className="text-sm text-gray-500">归还凭证：</p><img src={booking.returnImageUrl} alt="Return" className="w-32 h-32 object-cover rounded mt-1" /></div>}
           </div>
         ))}
       </div>

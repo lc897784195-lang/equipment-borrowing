@@ -1,0 +1,13 @@
+{
+  "envId": "recent-d4gjmvv2t6ac8f923",
+  "functionRoot": "./server",
+  "functions": [
+    {
+      "name": "api",
+      "handler": "index.main",
+      "runtime": "Nodejs18.15",
+      "timeout": 15,
+      "installDependency": true
+    }
+  ]
+}

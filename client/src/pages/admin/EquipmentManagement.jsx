@@ -5,17 +5,13 @@ const EquipmentManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ name: '', model: '', category: '相机套机', description: '', status: 'available' });
-  const [image, setImage] = useState(null);
   const categories = ['相机套机', '镜头', '灯光', '三脚架', '云台', '其他'];
   useEffect(() => { api.get('/equipment').then(res => setEquipment(res.data)); }, []);
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = new FormData();
-    Object.keys(formData).forEach(key => data.append(key, formData[key]));
-    if (image) data.append('image', image);
     try {
-      if (editingId) await api.put(`/equipment/${editingId}`, data, { headers: { 'Content-Type': 'multipart/form-data' } });
-      else await api.post('/equipment', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (editingId) await api.put(`/equipment/${editingId}`, formData);
+      else await api.post('/equipment', formData);
       api.get('/equipment').then(res => setEquipment(res.data));
       resetForm();
     } catch (error) { alert(error.response?.data?.error || '操作失败'); }
@@ -30,7 +26,7 @@ const EquipmentManagement = () => {
     try { await api.delete(`/equipment/${id}`); api.get('/equipment').then(res => setEquipment(res.data)); }
     catch (error) { alert(error.response?.data?.error || '删除失败'); }
   };
-  const resetForm = () => { setFormData({ name: '', model: '', category: '相机套机', description: '', status: 'available' }); setImage(null); setEditingId(null); setShowForm(false); };
+  const resetForm = () => { setFormData({ name: '', model: '', category: '相机套机', description: '', status: 'available' }); setEditingId(null); setShowForm(false); };
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
@@ -47,7 +43,6 @@ const EquipmentManagement = () => {
               <div><label className="block text-gray-700 mb-2">分类</label><select value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} className="w-full px-3 py-2 border rounded-lg">{categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
               <div><label className="block text-gray-700 mb-2">状态</label><select value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})} className="w-full px-3 py-2 border rounded-lg"><option value="available">可用</option><option value="maintenance">维护中</option></select></div>
               <div className="md:col-span-2"><label className="block text-gray-700 mb-2">描述</label><textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full px-3 py-2 border rounded-lg" rows="3" /></div>
-              <div className="md:col-span-2"><label className="block text-gray-700 mb-2">图片</label><input type="file" accept="image/*" onChange={(e) => setImage(e.target.files[0])} className="w-full" /></div>
             </div>
             <div className="flex gap-2 mt-4">
               <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">{editingId ? '更新' : '创建'}</button>
@@ -59,7 +54,6 @@ const EquipmentManagement = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {equipment.map((item) => (
           <div key={item._id} className="bg-white rounded-lg shadow-md p-4">
-            {item.imageUrl && <img src={item.imageUrl} alt={item.name} className="w-full h-48 object-cover rounded mb-4" />}
             <h3 className="font-semibold">{item.name}</h3>
             <p className="text-gray-600">{item.model}</p>
             <p className="text-sm text-gray-500">{item.category}</p>

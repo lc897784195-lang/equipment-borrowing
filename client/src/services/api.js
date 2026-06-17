@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://recent-d4gjmvv2t6ac8f923-1443294699.ap-shanghai.app.tcloudbase.com/api';
 
 const api = axios.create({
   baseURL: API_URL,
