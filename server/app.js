@@ -6,14 +6,10 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors({
-  origin: process.env.CLIENT_URL || '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
+app.use(cors({ origin: '*' }));
 app.use(express.json());
 
-app.get('/', (req, res) => res.send('Equipment Borrowing API'));
+app.get('/', (req, res) => res.json({ status: 'ok' }));
 
 app.use('/auth', require('./routes/auth'));
 app.use('/equipment', require('./routes/equipment'));
